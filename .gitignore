@@ -1,0 +1,31 @@
+.DS_Store
+npm-debug.log
+yarn-error.log
+
+junit.xml
+test/reports/**
+
+# package directories
+node_modules
+jspm_packages
+cdk.out
+
+test/reports
+
+#intelij
+*.js
+*.d.ts
+.idea
+
+# VSCode config
+.vscode
+
+/.env
+.env
+*out.json
+*.map
+
+# Swagger spec is generated per stage, no need to include as part of repository
+swagger/api-spec.*
+
+!i18next-scanner.config.js

@@ -1,0 +1,33 @@
+{
+  "name": "webdriver-state-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "cd react-app && npm run build && cd .. && cdk deploy --all --profile nc_personal"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.787.0",
+    "chromedriver": "^136.0.0",
+    "selenium-webdriver": "^4.32.0",
+    "@sparticuz/chromium": "^133.0.0"
+  },
+  "devDependencies": {
+    "@aws-cdk/aws-lambda-nodejs": "^1.204.0",
+    "@types/node": "^22.15.12",
+    "@types/selenium-webdriver": "^4.1.28",
+    "aws-cdk-lib": "^2.194.0",
+    "constructs": "^10.4.2",
+    "dotenv": "^16.0.1",
+    "esbuild": "^0.25.3",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-typescript": "^3.0.0",
+    "eslint-plugin-sonarjs": "^0.16.0",
+    "prettier": "^2.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "private": true
+}

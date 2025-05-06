@@ -1,0 +1,59 @@
+{
+  "root": true,
+  "extends": [
+    "typescript",
+    "prettier",
+    "plugin:sonarjs/recommended"
+  ],
+  "ignorePatterns": [
+    "**/*.js",
+    "**/*.d.ts",
+    "develop",
+  ],
+  "parserOptions": {
+    "project": ["./tsconfig.json"]
+  },
+  "rules": {
+    // eslint
+    "no-useless-escape": "off",
+    "no-return-await": "off",
+    "no-unused-vars": "off",
+    "require-await": "off",
+
+    // sonar
+    "sonarjs/no-duplicate-string": "off",
+
+    // typescript-eslint
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "interface",
+        "format": ["PascalCase"],
+        "custom": {
+          "regex": "^I[A-Z]",
+          "match": false
+        }
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-floating-promises": ["error", {"ignoreIIFE": true }],
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+        "vars": "all"
+      }
+    ],
+    "@typescript-eslint/promise-function-async": "error",
+    "@typescript-eslint/return-await": ["off"],
+    "@typescript-eslint/require-await": "off",
+    "@typescript-eslint/no-empty-function": "off"
+  }
+}
