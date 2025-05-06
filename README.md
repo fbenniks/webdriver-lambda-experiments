@@ -4,95 +4,179 @@ This project demonstrates restoring the state of a React website using Selenium 
 
 ## Restored Data
 
-This experiment demonstrates restoring the following types of data for the React website:
+This experiment currently supports restoring the following types of data for a React website:
 
-| Data Type                             | Restored | Notes                                                                  |
-|---------------------------------------|----------|------------------------------------------------------------------------|
-| **Session Storage**                   | ✅       | Data stored for the current browser session.                           |
-| **Cookies**                           | ✅       | Includes HTTP and JavaScript-accessible cookies.                       |
-| **LocalStorage**                      | ✅       | Persistent data stored in the browser.                                 |
-| **Geo, camera, mic,ect Permissions** | ❌       | Not yet implemented in this experiment, but doable!                    |
-| **IndexedDB**                         | ❌       | Might be complex because of the  data structure for different websites |  
+| Data Type                              | Restored | Notes                                                                  |
+|----------------------------------------|----------|------------------------------------------------------------------------|
+| **Session Storage**                    | ✅        | Data stored for the current browser session.                           |
+| **Cookies**                            | ✅        | Includes HTTP and JavaScript-accessible cookies.                       |
+| **LocalStorage**                       | ✅        | Persistent data stored in the browser.                                 |
+| **Geo, Camera, Mic, etc. Permissions** | ❌        | Not yet implemented in this experiment, but feasible with additional setup. |
+| **IndexedDB**                          | ❌        | Not yet implemented due to complexity and variations in data structure. |
 
-The data is currently stored in S3 bucket, and the Lambda function retrieves it when needed. The data is stored in JSON format, making it easy to read and manipulate.
-The data storage is in adapter form and can be changed to any store solution required(for example dynamodb or memcache/redis).
+The data is currently stored in an **S3 bucket**. A Lambda function retrieves it when needed, using **JSON format** for easy storage and manipulation. The storage adapter can be easily switched to other solutions like DynamoDB, Memcached, or Redis.
+
+---
 
 ## React Website
-The React website is a basic React Bootstrap application with three buttons to store data in session storage, cookies, and localStorage. It is hosted on S3 and served via CloudFront.
+
+The React website is a simple react init application with three buttons that write to:
+
+- `sessionStorage`
+- `document.cookie`
+- `localStorage`
+
+It is hosted on **S3** and served via **CloudFront**.
+
+---
+
+## Architecture Diagram
+
+Below is a high-level architecture diagram illustrating the components and their interactions:
+
+```
++--------------------+       +-------------------+       +---------------------+
+|                    |       |                   |       |                     |
+|   React Website    +<----->+   CloudFront CDN  +<----->+   S3 Bucket (Static |
+|                    |       |                   |       |   Website Hosting)  |
+|                    |       |                   |       |                     |
++--------------------+       +-------------------+       +---------------------+
+        ^                                                       
+        |                                                       
+        |                                                       
+        |                                                       
+        v                                                       
++--------------------+       +-------------------+       +---------------------+
+|                    |       |                   |       |                     |
+|   Lambda Function  +<----->+   S3 Bucket       +<----->+   State Storage     |
+|   (Selenium Runner)|       |   (State Data)    |       |   (JSON Format)     |
+|                    |       |                   |       |                     |
++--------------------+       +-------------------+       +---------------------+
+```
+
+---
 
 ## CDK Deployment
-The project is deployed using AWS CDK in TypeScript. It consists of two stacks:
+
+This project uses **AWS CDK (in TypeScript)** for deployment and consists of two stacks:
 
 ### ReactSiteCdkStack
-This stack deploys the React website to an S3 bucket and serves it through a CloudFront distribution.
 
-- **S3 Bucket**: Stores the React website's static files.
-- **CloudFront Distribution**: Provides secure and fast access to the website.
-- **Deployment**: The `build/` folder of the React app is deployed to the S3 bucket.
+Deploys the static React website.
+
+- **S3 Bucket**: Stores the React build artifacts.
+- **CloudFront Distribution**: Serves the site.
+- **Deployment Command**: Runs `npm run deploy` to build and upload contents of the `build/` directory.
 
 ### SeleniumRunnersCdkStack
-This stack sets up a Lambda function that runs Selenium WebDriver to interact with the React website and store/retrieve state data in an S3 bucket.
 
-- **S3 Bucket**: Used to store WebDriver state data.
-- **Lambda Function**: Runs Selenium WebDriver with a custom Chromium layer.
-    - **Environment Variables**:
+Sets up a Lambda function to run **Selenium WebDriver** headlessly.
+
+- **S3 Bucket**: Stores serialized browser state (session storage, cookies, localStorage).
+- **Lambda Function**:
+    - Uses a **custom Chromium layer** that includes headless Chrome and WebDriver.
+    - Captures browser state and uploads it to S3.
+    - Accepts the following environment variables:
         - `URL`: The URL of the React website.
-        - `S3_WEBDRIVER_DATA_BUCKET`: The name of the S3 bucket for storing state data.
-        - `FONTCONFIG_PATH`: Path for font configuration.
-    - **Custom Chromium Layer**: Includes a headless Chromium browser and WebDriver.
+        - `S3_WEBDRIVER_DATA_BUCKET`: The bucket used for storing state.
+        - `FONTCONFIG_PATH`: Path for font config (needed by headless Chrome).
+
+---
 
 ## Prerequisites
+
 - Node.js and npm installed.
-- AWS CLI configured.
-- AWS CDK installed globally.
+- AWS CLI configured with valid credentials.
+- AWS CDK installed globally:
+  ```bash
+  npm install -g aws-cdk
+  ```
+
+---
 
 ## Deployment Steps
-1. Build the React app:
+1 Deploy the CDK stacks:
    ```bash
-   npm run deploy
-    ```
+   cdk deploy
+   ```
+
+---
 
 ## Local Testing
 
-You can test the Lambda function locally by setting up a `.env` file in the root of the project. The `.env` file should include the necessary environment variables, such as `AWS_PROFILE`, to configure your AWS credentials.
+You can test the Lambda function locally by setting up a `.env` file in the root of the project.
 
-Example `.env` file:
-```bash
+### Example `.env` file:
+```dotenv
 AWS_PROFILE=default
 AWS_REGION=us-east-1
 URL=https://d241m574llre88.cloudfront.net
 S3_WEBDRIVER_DATA_BUCKET=seleniumrunnerscdkstack-seleniumrunnerscdkbucketc2-plnkitv3w858
 ```
 
-
-To run the Lambda function locally, use the `test/local-runner-webdriver-experiment.ts` script:
+Run the test locally with:
 ```bash
 ts-node test/local-runner-webdriver-experiment.ts
 ```
 
-## Cloud testing:
-Deploy the stacks and navigate to the CloudFormation console to find the Lambda function. You can invoke the function from the AWS console or use the AWS CLI.
+---
+
+## Cloud Testing
+
+After deploying the stacks, you can invoke the Lambda function directly:
+
+- Via **AWS Console** (under Lambda > Test)
+- Or using AWS CLI:
+  ```bash
+  aws lambda invoke --function-name <YourFunctionName> output.json
+  ```
+
+---
 
 ## Validating Data Restore
 
-The logic pushes state to an array, and at the end of the invocation, the state is printed.
+Each invocation prints out a log of what data was restored or initialized:
 
-### First Invocation
-When no state is recorded, the system prints:
+### First Invocation (no state exists):
 
 ```json
 [
-  "Session did not exists, setting it now: Session label: Hello session 808",
-  "Cookie did not exists, setting it now: Cookie label: Hello cookie 31",
-  "Localstorage did not exists, setting it now: LocalStorage label: Hello localStorage 248"
+  "Session did not exist, setting it now: Session label: Hello session 808",
+  "Cookie did not exist, setting it now: Cookie label: Hello cookie 31",
+  "LocalStorage did not exist, setting it now: LocalStorage label: Hello localStorage 248"
 ]
 ```
 
-When the code is invoced a second time it shows that the data is already known:
+### Second Invocation (state restored):
+
 ```json
 [
-'Session already exists: Session label: Hello session 146',
-'Cookie already exists: Cookie label: Hello cookie 969',
-'Localstorage already exists: LocalStorage label: Hello localStorage 344'
+  "Session already exists: Session label: Hello session 146",
+  "Cookie already exists: Cookie label: Hello cookie 969",
+  "LocalStorage already exists: LocalStorage label: Hello localStorage 344"
 ]
 ```
+
+## Alternative Approaches
+
+### 1. Shared File System with Amazon EFS
+
+One method for persisting Selenium WebDriver state is to use a **shared file system**, such as Amazon EFS, mounted to the Lambda function. This allows the browser's profile directory (which contains cookies, local storage, cache, etc.) to persist across Lambda invocations without needing to manually serialize or deserialize any data.
+
+This approach can support more complex browser state, including **IndexedDB** and cached assets.
+
+However, this was **not implemented** in this project due to the complexity of configuring Lambda inside a **VPC**, which is required to mount EFS. VPC-enabled Lambdas can lead to slower cold starts and require more intricate networking setups, which were out of scope for this experiment.
+
+### 2. Remote WebDriver via Docker Container
+
+Another option is to run **Chrome and WebDriver inside a persistent Docker container**, such as on an EC2 instance or an AWS Fargate task. The Lambda function can then connect to this container using **Selenium Remote WebDriver** over the network.
+
+This setup keeps browser state within the container’s file system and removes the need to package and manage a browser inside the Lambda function.
+
+While powerful, this introduces operational complexity:
+- Managing long-lived containers (scaling, uptime, and patching)
+- Exposing the WebDriver port securely (e.g., inside a private VPC)
+- Health-checking and restarting the container if it fails
+
+This architecture is best suited for scenarios where browser state is complex or test throughput exceeds Lambda’s constraints.
+
