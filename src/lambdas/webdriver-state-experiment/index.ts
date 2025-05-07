@@ -1,6 +1,6 @@
 import { Builder, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
-import { DriverHelper } from '../../driver/driverHelper'
+import { DriverHelper } from '../../driver/driver-helper'
 import { exec } from 'child_process'
 
 export const handler = async (event: any) => {
@@ -37,12 +37,12 @@ export const handler = async (event: any) => {
     '--single-process',
     '--disable-gpu',
     '--remote-debugging-port=9222',
-    '--disable-software-rasterizer', // Disable software rasterizer to avoid crashes
-    '--disable-extensions', // Disable extensions to reduce memory usage
-    '--disable-logging', // Disable unnecessary logging
-    '--disable-accelerated-2d-canvas', // Disable 2D canvas acceleration
-    '--disable-accelerated-video-decode', // Disable video decode acceleration
-    '--disable-hardware-media-key-handling' // Disable hardware key handling
+    '--disable-software-rasterizer',
+    '--disable-extensions',
+    '--disable-logging',
+    '--disable-accelerated-2d-canvas',
+    '--disable-accelerated-video-decode',
+    '--disable-hardware-media-key-handling'
   )
   options.setChromeBinaryPath(process.env.CHROME_BIN!)
   const serviceBuilder = new chrome.ServiceBuilder(process.env.CHROMEDRIVER_BIN!)
