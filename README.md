@@ -77,12 +77,11 @@ Sets up a Lambda function to run **Selenium WebDriver** headlessly.
 
 - **S3 Bucket**: Stores serialized browser state (session storage, cookies, localStorage).
 - **Lambda Function**:
-    - Uses a **custom Chromium layer** that includes headless Chrome and WebDriver.
+    - Uses a **docker image as runtime** that includes headless Chrome and WebDriver.
     - Captures browser state and uploads it to S3.
     - Accepts the following environment variables:
         - `URL`: The URL of the React website.
         - `S3_WEBDRIVER_DATA_BUCKET`: The bucket used for storing state.
-        - `FONTCONFIG_PATH`: Path for font config (needed by headless Chrome).
 
 ---
 
