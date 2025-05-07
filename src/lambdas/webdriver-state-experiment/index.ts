@@ -1,22 +1,60 @@
 import { Builder, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { DriverHelper } from '../../driver/driverHelper'
+import { exec } from 'child_process'
 
 export const handler = async (event: any) => {
   console.log('Received event:', JSON.stringify(event, null, 2))
+  console.log('checking versions-> usefull for debugging in docker')
 
+  // Inline code to check Chrome version
+  const checkVersion = async (command: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      exec(command, (error: Error | null, stdout: string, stderr: string) => {
+        if (error) {
+          reject(`Error: ${stderr || error.message}`)
+        } else {
+          resolve(stdout.trim())
+        }
+      })
+    })
+  }
+
+  try {
+    const chromeVersion = await checkVersion('google-chrome --version')
+    console.log(`Google Chrome version: ${chromeVersion}`)
+
+    const chromedriverVersion = await checkVersion('chromedriver --version')
+    console.log(`Chromedriver version: ${chromedriverVersion}`)
+  } catch (error) {
+    console.error('Error checking versions:', error)
+  }
   const options = new chrome.Options()
   options.addArguments(
     '--headless',
-    '--single-process',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
     '--no-sandbox',
-    '--enable-logging',
-    '--v=1',
-    '--vmodule=*browser*=2'
+    '--disable-dev-shm-usage',
+    '--single-process',
+    '--disable-gpu',
+    '--remote-debugging-port=9222',
+    '--disable-software-rasterizer', // Disable software rasterizer to avoid crashes
+    '--disable-extensions', // Disable extensions to reduce memory usage
+    '--disable-logging', // Disable unnecessary logging
+    '--disable-accelerated-2d-canvas', // Disable 2D canvas acceleration
+    '--disable-accelerated-video-decode', // Disable video decode acceleration
+    '--disable-hardware-media-key-handling' // Disable hardware key handling
   )
-  const driver: WebDriver = await new Builder().forBrowser('chrome').setChromeOptions(options).build()
+  options.setChromeBinaryPath(process.env.CHROME_BIN!)
+  const serviceBuilder = new chrome.ServiceBuilder(process.env.CHROMEDRIVER_BIN!)
+  console.log('serviceBuilder created')
+
+  const driver: WebDriver = await new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(options)
+    .setChromeService(serviceBuilder)
+    .build()
+
+  console.log('Driver created')
 
   const result = []
 
