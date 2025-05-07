@@ -154,9 +154,9 @@ Each invocation prints out a log of what data was restored or initialized:
 
 ```json
 [
-  "Session already exists: Session label: Hello session 146",
-  "Cookie already exists: Cookie label: Hello cookie 969",
-  "LocalStorage already exists: LocalStorage label: Hello localStorage 344"
+  "Session already exists: Session label: Hello session 808",
+  "Cookie already exists: Cookie label: Hello cookie 31",
+  "LocalStorage already exists: LocalStorage label: Hello localStorage 248"
 ]
 ```
 
