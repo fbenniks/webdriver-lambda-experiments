@@ -28,6 +28,9 @@ The React website is a simple react init application with three buttons that wri
 
 It is hosted on **S3** and served via **CloudFront**.
 
+![React App](react-app/simple_react.png)
+
+
 ---
 
 ## Architecture Diagram
