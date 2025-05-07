@@ -100,7 +100,7 @@ Sets up a Lambda function to run **Selenium WebDriver** headlessly.
 ## Deployment Steps
 1 Deploy the CDK stacks:
    ```bash
-   cdk deploy
+   npm run deploy
    ```
 
 ---
